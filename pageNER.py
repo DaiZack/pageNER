@@ -1,5 +1,6 @@
 import requests,re,json
 from bs4 import BeautifulSoup,Comment
+from collections import Counter
 
 import spacy
 import en_core_web_sm
@@ -8,7 +9,7 @@ nlp = en_core_web_sm.load()
 def site_ner(url):
   if not url.endswith('/'):
     url += '/'
-  ner = {'EMAIL':[],'PHONE':[],'ADDRESS':[],'POSTALCODE':[],'LOC':[],'ORG':[],'GPE':[],'PERSON':[],'EVENT':[]}
+  ner = {'EMAIL':[],'PHONE':[],'ADDRESS':[],'POSTALCODE':[],'LOC':[],'ORG':[],'GPE':[],'PERSON':[],'EVENT':[], 'KEYWORDS':[]}
   level = 0
   def page_ner(url0):
       print(url0)
@@ -26,6 +27,14 @@ def site_ner(url):
             links = [link if link.startswith(url) else url+re.findall(r'\W*(\w.*)',link)[0] for link in links if re.findall(r'\W*(\w.*)',link)]
             links = list(set(links))
             contactlinks = [cl for cl in links if 'contact' in cl]
+          
+          text = '. '.join(visable_tags)
+          token = nlp(text.lower())
+          token = [tk.lemma_ for tk in token if (not tk.is_stop) and tk.is_alpha]
+          keywords = [c[0] for c in Counter(token).most_common(20)]
+          webstopwords = ['http','www','home','page','time','out','error','service','server','connect','fail','fobiden','skip','start','contact','email','facebook','read','more','help','hour','twitter','google','about','back','search','next','last','menu','news','blog','solution','address','phone','website','copyright','reserved','english']
+          keywords = [keyword for keyword in keywords if 3<len(keyword)<20 and keyword not in webstopwords][:20]
+          ner['KEYWORDS'] += keywords
           
           for tag in visable_tags:
               tag = re.sub(r'[\n\s\r\t/]+',' ', tag)
@@ -67,11 +76,13 @@ def site_ner(url):
   contactlinks = page_ner(url)
   for cl in contactlinks:
     page_ner(cl)
-    
+
   for key in ner.keys():
+    print(ner[key])
     ner[key] = list(set(ner[key]))
   return ner
 
 url = 'https://brocku.ca'
 info = site_ner(url)
 print(info)
+
