@@ -10,16 +10,16 @@ def get_city(url):
     with open('tt.txt','w') as t:
       t.write(page)
     page = re.sub(r'\W',' ',page)
-    page = re.sub(r'\s+',' ',page)
+    page = re.sub(r'\s+',' ',page).upper()
     print(page)
     cand = []
     for city in cities:
         cc = city.split(',')
-        if city.replace(',', ' ') in page:
+        if city.replace(',', ' ').upper() in page:
             cand.append(city)
     print(cand)
     if cand:
         return cand[-1]
         return ''
       
-get_city('www.brocku.ca')
+get_city('www.fenigo.com')
