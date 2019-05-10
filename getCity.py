@@ -2,10 +2,12 @@ with open('city-in-canada.csv','rb') as f:
     cities = f.read().decode('utf8').split('\n')[1:]
     cities = [c for c in cities if ',' in c]
 
+
 def get_city(url):
     if not url.startswith('http://'):
         url = 'http://'+url
-    page = str(requests.get(url).content)
+    html = requests.get(url)
+    page = str(html.content)
     print(page)
     with open('tt.txt','w') as t:
       t.write(page)
@@ -19,7 +21,8 @@ def get_city(url):
             cand.append(city)
     print(cand)
     if cand:
-        return cand[-1]
-        return ''
+        return cand[-1], html.status_code
+    else:
+        return '', html.status_code
       
 get_city('www.fenigo.com')
