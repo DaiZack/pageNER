@@ -1,5 +1,7 @@
+import requests, re
+
 with open('city-in-canada.csv','rb') as f:
-    cities = f.read().decode('utf8').split('\n')[1:]
+    cities = f.read().decode('utf8')..replace('\r','').split('\n')[1:]
     cities = [c for c in cities if ',' in c]
 
 
